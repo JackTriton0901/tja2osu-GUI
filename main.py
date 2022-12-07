@@ -9,19 +9,23 @@ def tja_select():
   idir = 'C:\\python_test'
   filetype = [("tjaFile","*.tja")]
   file_path = filedialog.askopenfilename(title="Select the tja file", filetypes = filetype, initialdir = idir)
-  input_box.delete(0,tk.END)
-  input_box.insert(tk.END, file_path)
+  if file_path != "":
+    input_box.delete(0,tk.END)
+    input_box.insert(tk.END, file_path)
+    file_path = ""
 
 def osu_select():
   idir = 'C:\\python_test'
   file_out = filedialog.askdirectory(title="Select the path to save osu", initialdir = idir)
-  file_in = input_box.get()
-  artist = input_box1.get()
-  creator = input_box2.get()
-  convertio(file_in, artist, creator, file_out)
-  input_box.delete(0,tk.END)
-  input_box.insert(tk.END, file_path)
-  messagebox.showinfo('Success!', 'The file has successfully converted!')
+  if file_out != "":
+    file_in = input_box.get()
+    artist = input_box1.get()
+    creator = input_box2.get()
+    convertio(file_in, artist, creator, file_out)
+    input_box.delete(0,tk.END)
+    input_box.insert(tk.END, file_path)
+    messagebox.showinfo('Success!', 'The file has successfully converted!')
+    file_out = ""
   
 root = tk.Tk()
 root.title("TJA2OSU GUI")
