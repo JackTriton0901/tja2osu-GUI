@@ -19,6 +19,7 @@ def Bdon(off):
 def Bka(off):
     return f"256,192,{off},1,12,0:0:0:0:\n"
 
+# need to fix
 def slide(last, off, big=False):
     global bpm, scroll
     curve = 100 * (off - last) * bpm * 1.4 * scroll / 60000
