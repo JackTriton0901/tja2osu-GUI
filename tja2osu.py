@@ -19,10 +19,18 @@ def Bdon(off):
 def Bka(off):
     return f"256,192,{off},1,12,0:0:0:0:\n"
 
-# need to fix
 def slide(last, off, big=False):
-    global bpm, scroll
-    curve = 100 * (off - last) * bpm * 1.4 * scroll / 60000
+    global ChangingPoints
+    for i in range(len(ChangingPoints)):
+        if ChangingPoints[i][0] > last:
+            beats = ChangingPoints[i-1][1]
+            scr = ChangingPoints[i-1][2]
+            break
+        elif ChangingPoints[i][0] == last:
+            beats = ChangingPoints[i][1]
+            scr = ChangingPoints[i][2]
+            break
+    curve = 100 * (off - last) * beats * 1.4 * scr / 60000
     curin = 256 + int(curve)
     laster = int(last)
     if big:
@@ -33,10 +41,11 @@ def slide(last, off, big=False):
 def spin(last, off):
     return f"256,192,{last},12,0,{off}\n"
 
-def cleanlist(dat:list):
+def cleanlist(start:list, dat:list):
     ger = sorted(dat)
     seen = []
     sorted_list = [x for x in ger if x not in seen and not seen.append(x)]
+    sorted_list.insert(0, data_s)
     return sorted_list
 
 audio = "audio.mp3"
@@ -61,6 +70,8 @@ lasted = 0
 tear = 0
 scroll = 1.0
 get = ""
+ChangingPoints = []
+data_s = []
 
 general_k = [
     "osu file format v14",
@@ -116,7 +127,7 @@ general_k = [
     ]
 general = general_k
 def convertio(filein, artist, creator, fileout):
-    global title, general, general_k, crop, delay_list, delay_list1, get, timec, scroll, version, bpm_k, glock, timep, lasted, tear, bpm, shou, offset, off_k, changed, measure, songvol, gogo
+    global title, general, data_s, ChangingPoints, general_k, crop, delay_list, delay_list1, get, timec, scroll, version, bpm_k, glock, timep, lasted, tear, bpm, shou, offset, off_k, changed, measure, songvol, gogo
     artist = artist
     creator = creator
     with open(filein)as inp:
@@ -155,14 +166,15 @@ def convertio(filein, artist, creator, fileout):
                     else:
                         version = block[1].rstrip()
                 line = inp.readline()
+            ChangingPoints.append([offset, bpm, scroll])
             line = inp.readline()
-            data.append([offset, timep, gogo, songvol])
+            data_s=[offset, timep, gogo, songvol]
             while line.rstrip() != "#END":
                 if line[0] == "#":
                     block = line.split(" ")
                     if block[0].rstrip() == "#BPMCHANGE":
                         if changed:
-                            data_k.append([get.rstrip(","), offset, timep, gogo, songvol])
+                            data_k.append([get.rstrip(","), offset, timep, gogo, songvol, bpm, scroll])
                             changed = False
                         else:
                             changed = True
@@ -186,7 +198,7 @@ def convertio(filein, artist, creator, fileout):
                             shou = 60000/bpm*4*measure
                     elif block[0].rstrip() == "#SCROLL":
                         if changed:
-                            data_k.append([get.rstrip(","), offset, timep, gogo, songvol])
+                            data_k.append([get.rstrip(","), offset, timep, gogo, songvol, bpm, scroll])
                             changed = False
                         else:
                             changed = True
@@ -199,7 +211,7 @@ def convertio(filein, artist, creator, fileout):
                         offset += 1000*float(block[1].rstrip())
                 elif line.startswith("//") is False:
                     if glock:
-                        data_k.append([get.rstrip(","), offset, timep, gogo, songvol])
+                        data_k.append([get.rstrip(","), offset, timep, gogo, songvol, bpm, scroll])
                         changed = False
                         glock = False
                     if line.rstrip("\n") == ",":
@@ -213,6 +225,9 @@ def convertio(filein, artist, creator, fileout):
                             for i in data_k:
                                 trans = i[1] + shou * len(i[0]) / tem
                                 data.append([trans, i[2], i[3], i[4]])
+                                if ChangingPoints[-1][0] == trans:
+                                    ChangingPoints = ChangingPoints[:-1]
+                                ChangingPoints.append([trans, i[5], i[6]])
                         yerd = offset
                         for i in get.rstrip(","):
                             if int(yerd) in delay_list:
@@ -225,7 +240,7 @@ def convertio(filein, artist, creator, fileout):
                         get = ""
                         data_k = []
                 line = inp.readline()
-            data = cleanlist(data)
+            data = cleanlist(data_s, data)
             if os.path.exists(os.path.join(fileout, f"{artist} - {title}({creator})[{version}].osu")):
                 os.remove(os.path.join(fileout, f"{artist} - {title}({creator})[{version}].osu"))
             with open(os.path.join(fileout, f"{artist} - {title}({creator})[{version}].osu"), mode = "a+", encoding = "utf-8") as output:
@@ -285,5 +300,6 @@ def convertio(filein, artist, creator, fileout):
             bpm = bpm_k
             shou = 60000/bpm*4
             timep = timec
-            data = [[offset, timep, gogo, songvol]]
+            ChangePoints = []
+            data = []
             line = inp.readline()
