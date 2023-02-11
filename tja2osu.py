@@ -82,7 +82,6 @@ data_s = []
 general_k = [
     "osu file format v14",
     "",
-    "",
     "[General]",
     "AudioFilename: audio.mp3",
     "AudioLeadIn: 0",
@@ -136,7 +135,7 @@ def convertio(filein, artist, creator, fileout):
     global title, general, data_s, ChangingPoints, general_k, crop, delay_list, delay_list1, get, timec, scroll, version, bpm_k, glock, timep, lasted, tear, bpm, shou, offset, off_k, changed, measure, songvol, gogo
     artist = artist
     creator = creator
-    with open(filein)as inp:
+    with open(filein, encoding="cp932", errors='ignore')as inp:
         data = []
         data_k = []
         humen = []
