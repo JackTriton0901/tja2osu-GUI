@@ -21,15 +21,21 @@ def Bka(off):
 
 def slide(last, off, big=False):
     global ChangingPoints
-    for i in range(len(ChangingPoints)):
-        if ChangingPoints[i][0] > last:
-            beats = ChangingPoints[i-1][1]
-            scr = ChangingPoints[i-1][2]
-            break
-        elif ChangingPoints[i][0] == last:
-            beats = ChangingPoints[i][1]
-            scr = ChangingPoints[i][2]
-            break
+    ren = range(len(ChangingPoints))
+    r = len(ChangingPoints)
+    if ChangingPoints[r-1][0] < last:
+        beats = ChangingPoints[r-1][1]
+        scr = ChangingPoints[r-1][2]
+    else:
+        for i in ren:
+            if ChangingPoints[i][0] > last:
+                beats = ChangingPoints[i-1][1]
+                scr = ChangingPoints[i-1][2]
+                break
+            elif ChangingPoints[i][0] == last:
+                beats = ChangingPoints[i][1]
+                scr = ChangingPoints[i][2]
+                break       
     curve = 100 * (off - last) * beats * 1.4 * scr / 60000
     curin = 256 + int(curve)
     laster = int(last)
